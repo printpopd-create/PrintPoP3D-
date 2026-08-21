@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Articulated flexi dragon fidget">
+  <defs>
+    <linearGradient id="dg" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#D62BE8"/>
+      <stop offset="45%" stop-color="#3B6FF5"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="dgHead" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3B6FF5"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="dgWing" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#D62BE8" stop-opacity=".45"/>
+      <stop offset="100%" stop-color="#22D3EE" stop-opacity=".30"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- soft ground -->
+  <ellipse cx="200" cy="268" rx="140" ry="12" fill="#22D3EE" opacity=".055"/>
+
+  <g filter="url(#glow)">
+
+    <!-- ============ WINGS (behind body) ============ -->
+    <g stroke-linejoin="round" stroke-linecap="round">
+      <!-- far wing -->
+      <g opacity=".45">
+        <path d="M228 172 L268 74 L214 60 Q198 80 166 80 Q162 106 138 124 Q180 152 228 172 Z"
+              fill="url(#dgWing)" stroke="#3B6FF5" stroke-width="2.4"/>
+      </g>
+      <!-- near wing -->
+      <path d="M246 166 L296 58 L236 46 Q218 66 184 66 Q178 94 152 112 Q196 142 246 166 Z"
+            fill="url(#dgWing)" stroke="#22D3EE" stroke-width="2.8"/>
+      <g stroke="#22D3EE" stroke-width="2" opacity=".75" fill="none">
+        <path d="M296 58 L236 46 M296 58 L184 66 M296 58 L152 112"/>
+      </g>
+    </g>
+
+    <!-- ============ BACK LEG ============ -->
+    <g stroke="#2C55C8" stroke-width="13" stroke-linecap="round" fill="none">
+      <path d="M156 212 L150 240"/>
+    </g>
+    <ellipse cx="158" cy="248" rx="15" ry="7" fill="#2C55C8"/>
+
+    <!-- ============ BODY: articulated segments ============ -->
+    <!-- back ridge spikes, rotated to follow the spine -->
+    <g fill="#D62BE8" stroke="#05060A" stroke-width="1.6" stroke-linejoin="round">
+      <g transform="translate(124,216) rotate(-17)"><path d="M-6 -15 L0 -28 L6 -15 Z"/></g>
+      <g transform="translate(152,206) rotate(-20)"><path d="M-7 -17 L0 -32 L7 -17 Z"/></g>
+      <g transform="translate(182,196) rotate(-18)"><path d="M-7 -19 L0 -34 L7 -19 Z"/></g>
+      <g transform="translate(212,184) rotate(-22)"><path d="M-7 -19 L0 -34 L7 -19 Z"/></g>
+      <g transform="translate(240,169) rotate(-28)"><path d="M-6 -18 L0 -32 L6 -18 Z"/></g>
+      <g transform="translate(264,151) rotate(-37)"><path d="M-6 -17 L0 -29 L6 -17 Z"/></g>
+      <g transform="translate(284,131) rotate(-45)"><path d="M-5 -15 L0 -25 L5 -15 Z"/></g>
+    </g>
+
+    <!-- tail spikes -->
+    <g fill="#D62BE8" stroke="#05060A" stroke-width="1.4" stroke-linejoin="round">
+      <g transform="translate(74,230) rotate(-14)"><path d="M-4 -9 L0 -18 L4 -9 Z"/></g>
+      <g transform="translate(98,224) rotate(-16)"><path d="M-5 -12 L0 -22 L5 -12 Z"/></g>
+    </g>
+
+    <!-- segment chain -->
+    <g stroke="#05060A" stroke-width="2.6">
+      <circle cx="46"  cy="240" r="5"    fill="url(#dg)"/>
+      <circle cx="60"  cy="238" r="7.5"  fill="url(#dg)"/>
+      <circle cx="76"  cy="233" r="10"   fill="url(#dg)"/>
+      <circle cx="98"  cy="226" r="12.5" fill="url(#dg)"/>
+      <circle cx="124" cy="217" r="15"   fill="url(#dg)"/>
+      <circle cx="152" cy="207" r="17.5" fill="url(#dg)"/>
+      <circle cx="182" cy="197" r="19"   fill="url(#dg)"/>
+      <circle cx="212" cy="185" r="19.5" fill="url(#dg)"/>
+      <circle cx="240" cy="170" r="18.5" fill="url(#dg)"/>
+      <circle cx="264" cy="152" r="17"   fill="url(#dg)"/>
+      <circle cx="284" cy="132" r="15"   fill="url(#dg)"/>
+    </g>
+
+    <!-- ============ FRONT LEG ============ -->
+    <g stroke="#3B6FF5" stroke-width="13" stroke-linecap="round" fill="none">
+      <path d="M232 190 L228 216"/>
+    </g>
+    <ellipse cx="238" cy="224" rx="16" ry="7.5" fill="#3B6FF5"/>
+
+    <!-- ============ HEAD ============ -->
+    <g stroke="#05060A" stroke-width="2.6" stroke-linejoin="round">
+      <!-- horns (behind skull) -->
+      <path d="M292 114 C276 102 258 88 240 74 C258 80 294 98 312 106 Z" fill="#E85CF0"/>
+      <path d="M306 106 C292 92 276 76 262 58 C280 68 314 90 326 100 Z" fill="#D62BE8"/>
+      <!-- ear frill -->
+      <path d="M298 122 L272 116 L284 136 Z" fill="#D62BE8"/>
+      <!-- skull + snout -->
+      <path d="M288 142
+               C286 116 300 98 322 96
+               C346 94 368 106 384 120
+               L374 128 L360 124 L366 138
+               C346 150 314 152 296 146 Z" fill="url(#dgHead)"/>
+      <!-- jaw -->
+      <path d="M300 146 C318 154 344 154 362 144 C348 158 316 160 300 150 Z" fill="#2C55C8"/>
+      
+      
+    </g>
+    <!-- eye -->
+    <ellipse cx="330" cy="118" rx="7.5" ry="8.5" fill="#05060A"/>
+    <circle cx="332" cy="115" r="3" fill="#22D3EE"/>
+    <!-- nostril -->
+    <circle cx="371" cy="122" r="2.6" fill="#05060A"/>
+  </g>
+</svg>

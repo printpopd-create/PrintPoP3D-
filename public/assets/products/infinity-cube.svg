@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Infinity fidget cube">
+  <defs>
+    <linearGradient id="cTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#67E8F9"/><stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="cLeft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3B6FF5"/><stop offset="100%" stop-color="#1E3A9E"/>
+    </linearGradient>
+    <linearGradient id="cRight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D62BE8"/><stop offset="100%" stop-color="#7A1690"/>
+    </linearGradient>
+    <filter id="g2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <ellipse cx="200" cy="272" rx="118" ry="13" fill="#D62BE8" opacity=".07"/>
+
+  <g filter="url(#g2)">
+    <!-- rotation arcs -->
+    <path d="M92 88 a118 118 0 0 1 74 -46" stroke="#22D3EE" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>
+    <path d="M166 42 l-16 -3 l7 15 Z" fill="#22D3EE" opacity=".45"/>
+    <path d="M312 208 a118 118 0 0 1 -76 48" stroke="#D62BE8" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>
+    <path d="M236 256 l16 3 l-7 -15 Z" fill="#D62BE8" opacity=".45"/>
+
+    <!-- cube body -->
+    <polygon points="200,45 300,95 200,145 100,95" fill="url(#cTop)"/>
+    <polygon points="100,95 200,145 200,258 100,208" fill="url(#cLeft)"/>
+    <polygon points="300,95 200,145 200,258 300,208" fill="url(#cRight)"/>
+
+    <!-- 2x2 seams per face -->
+    <g stroke="#05060A" stroke-width="3" stroke-linecap="round" opacity=".85">
+      <line x1="250" y1="70"  x2="150" y2="120"/>
+      <line x1="150" y1="70"  x2="250" y2="120"/>
+      <line x1="150" y1="120" x2="150" y2="233"/>
+      <line x1="100" y1="152" x2="200" y2="202"/>
+      <line x1="250" y1="120" x2="250" y2="233"/>
+      <line x1="300" y1="152" x2="200" y2="202"/>
+    </g>
+
+    <!-- outline -->
+    <g stroke="#F5F7FF" stroke-width="3" fill="none" stroke-linejoin="round" opacity=".9">
+      <polygon points="200,45 300,95 300,208 200,258 100,208 100,95"/>
+      <path d="M200,145 L100,95 M200,145 L300,95 M200,145 L200,258"/>
+    </g>
+  </g>
+</svg>

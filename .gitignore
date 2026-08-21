@@ -1,0 +1,12 @@
+# dependencies
+node_modules/
+
+# your private data — never commit these
+data/admin.json
+data/site.json
+data/uploads/
+data/*.tmp
+
+# editor / OS noise
+.DS_Store
+Thumbs.db

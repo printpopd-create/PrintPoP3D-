@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Fidget slider">
+  <defs>
+    <linearGradient id="sBody" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1B2340"/><stop offset="100%" stop-color="#0A0E1C"/>
+    </linearGradient>
+    <linearGradient id="sPuck" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22D3EE"/><stop offset="55%" stop-color="#3B6FF5"/><stop offset="100%" stop-color="#D62BE8"/>
+    </linearGradient>
+    <filter id="g3" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <ellipse cx="200" cy="248" rx="128" ry="13" fill="#3B6FF5" opacity=".07"/>
+
+  <g filter="url(#g3)">
+    <!-- shell -->
+    <rect x="58" y="98" width="284" height="112" rx="56" fill="url(#sBody)" stroke="#3B6FF5" stroke-width="3"/>
+    <rect x="58" y="98" width="284" height="112" rx="56" fill="none" stroke="#22D3EE" stroke-width="1.2" opacity=".5"/>
+
+    <!-- track -->
+    <rect x="86" y="126" width="228" height="56" rx="28" fill="#05060A" opacity=".85" stroke="#22D3EE" stroke-width="1.6" opacity=".55"/>
+
+    <!-- detents -->
+    <g fill="#22D3EE" opacity=".45">
+      <circle cx="120" cy="154" r="4"/><circle cx="164" cy="154" r="4"/>
+      <circle cx="236" cy="154" r="4"/><circle cx="280" cy="154" r="4"/>
+    </g>
+
+    <!-- motion trail -->
+    <g stroke="#22D3EE" stroke-linecap="round" fill="none">
+      <line x1="112" y1="154" x2="150" y2="154" stroke-width="5" opacity=".22"/>
+      <line x1="132" y1="136" x2="158" y2="136" stroke-width="4" opacity=".16"/>
+      <line x1="132" y1="172" x2="158" y2="172" stroke-width="4" opacity=".16"/>
+    </g>
+
+    <!-- puck -->
+    <circle cx="212" cy="154" r="34" fill="url(#sPuck)" stroke="#05060A" stroke-width="3"/>
+    <circle cx="212" cy="154" r="18" fill="#05060A" opacity=".55"/>
+    <circle cx="212" cy="154" r="9"  fill="#22D3EE"/>
+    <circle cx="204" cy="144" r="5"  fill="#F5F7FF" opacity=".55"/>
+
+    <!-- click sparks -->
+    <g stroke="#D62BE8" stroke-width="3" stroke-linecap="round" opacity=".8">
+      <line x1="306" y1="112" x2="318" y2="100"/>
+      <line x1="318" y1="146" x2="334" y2="146"/>
+      <line x1="306" y1="196" x2="318" y2="208"/>
+    </g>
+  </g>
+</svg>

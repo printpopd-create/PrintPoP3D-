@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin — PrintPoP 3D</title>
+<link rel="icon" href="/assets/logo.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+
+<!-- ===================== SETUP / LOGIN ===================== -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <img src="/assets/logo.jpeg" alt="PrintPoP 3D">
+
+    <!-- first run -->
+    <div id="setupBox" class="hidden">
+      <h1>Choose your password</h1>
+      <p class="lead">This is the first time anyone has opened the admin page. Pick a password — you'll need it every time you want to edit the site.</p>
+      <div class="notice err" id="setupErr"></div>
+      <div class="field">
+        <label for="setupPass">New password</label>
+        <input type="password" id="setupPass" autocomplete="new-password" placeholder="At least 8 characters">
+      </div>
+      <div class="field">
+        <label for="setupPass2">Type it again</label>
+        <input type="password" id="setupPass2" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary btn-block" id="setupBtn">Create password</button>
+      <p class="hint" style="margin-top:16px;color:var(--muted);font-size:13px">
+        Write it down somewhere safe — there is no "forgot password" email.
+      </p>
+    </div>
+
+    <!-- returning -->
+    <div id="loginBox" class="hidden">
+      <h1>Admin login</h1>
+      <p class="lead">Enter your password to edit the shop.</p>
+      <div class="notice err" id="loginErr"></div>
+      <div class="field">
+        <label for="loginPass">Password</label>
+        <input type="password" id="loginPass" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-block" id="loginBtn">Log in</button>
+      <p style="margin-top:18px"><a href="/" style="color:var(--muted);font-size:14px">← Back to the shop</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== EDITOR ===================== -->
+<div id="app" class="hidden">
+
+  <div class="topbar">
+    <div class="topbar-in">
+      <img src="/assets/logo.jpeg" alt="">
+      <b>Admin</b>
+      <span class="spacer"></span>
+      <span class="saved-dot" id="dirtyFlag">All changes saved</span>
+      <a class="btn btn-ghost btn-sm" href="/" target="_blank" rel="noopener">View shop ↗</a>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="products">Products</button>
+    <button class="tab" data-tab="text">Page text</button>
+    <button class="tab" data-tab="contact">Contact</button>
+    <button class="tab" data-tab="account">Password</button>
+  </div>
+
+  <main class="admin">
+
+    <!-- ---------- PRODUCTS ---------- -->
+    <section class="panel active" id="panel-products">
+      <div id="prodList"></div>
+      <button class="btn btn-primary btn-block" id="addProd">+ Add a product</button>
+
+      <div class="card-box" style="margin-top:26px">
+        <h2>Bundle offer</h2>
+        <p class="sub">The highlighted deal that shows under your products.</p>
+        <label class="check">
+          <input type="checkbox" data-field="settings.bundleEnabled">
+          <span>Show the bundle on the shop</span>
+        </label>
+        <div class="field">
+          <label>Bundle title</label>
+          <input type="text" data-field="settings.bundleTitle">
+        </div>
+        <div class="field">
+          <label>Bundle description</label>
+          <textarea data-field="settings.bundleText"></textarea>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Bundle price</label>
+            <input type="text" data-field="settings.bundlePrice" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label>Crossed-out price</label>
+            <input type="text" data-field="settings.bundleCompare" inputmode="decimal">
+            <div class="hint">Leave empty for no discount line.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PAGE TEXT ---------- -->
+    <section class="panel" id="panel-text">
+      <div class="card-box">
+        <h2>Top of the page</h2>
+        <p class="sub">Wrap words in *stars* to make them glow in your brand colors.</p>
+        <div class="field">
+          <label>Business name</label>
+          <input type="text" data-field="settings.brandName">
+        </div>
+        <div class="row">
+          <div class="field"><label>Tagline part 1</label><input type="text" data-field="settings.taglineA"></div>
+          <div class="field"><label>Part 2 (cyan)</label><input type="text" data-field="settings.taglineB"></div>
+          <div class="field"><label>Part 3 (pink)</label><input type="text" data-field="settings.taglineC"></div>
+        </div>
+        <div class="field">
+          <label>Intro paragraph</label>
+          <textarea data-field="settings.heroText"></textarea>
+        </div>
+        <div class="field">
+          <label>Badges</label>
+          <textarea data-field="settings.badges" data-list="1" placeholder="One per line"></textarea>
+          <div class="hint">One per line. Emojis work great here.</div>
+        </div>
+      </div>
+
+      <div class="card-box">
+        <h2>Shop section</h2>
+        <div class="field"><label>Heading</label><input type="text" data-field="settings.shopHeading"></div>
+        <div class="field"><label>Text under the heading</label><textarea data-field="settings.shopText"></textarea></div>
+        <div class="field">
+          <label>Currency symbol</label>
+          <input type="text" data-field="settings.currency" style="max-width:120px">
+        </div>
+      </div>
+
+      <div class="card-box">
+        <h2>Custom orders section</h2>
+        <div class="field"><label>Heading</label><input type="text" data-field="settings.customHeading"></div>
+        <div class="field"><label>Text</label><textarea data-field="settings.customText"></textarea></div>
+      </div>
+
+      <div class="card-box">
+        <h2>How it works</h2>
+        <div class="field"><label>Heading</label><input type="text" data-field="settings.stepsHeading"></div>
+        <div id="stepList"></div>
+      </div>
+
+      <div class="card-box">
+        <h2>Footer</h2>
+        <div class="field"><label>Footer note</label><input type="text" data-field="settings.footerNote"></div>
+      </div>
+    </section>
+
+    <!-- ---------- CONTACT ---------- -->
+    <section class="panel" id="panel-contact">
+      <div class="card-box">
+        <h2>Where customers reach you</h2>
+        <p class="sub">Leave one empty to hide its buttons everywhere on the site.</p>
+        <div class="field">
+          <label>TikTok username</label>
+          <input type="text" data-field="settings.tiktok" placeholder="printpop3d1">
+          <div class="hint">Without the @.</div>
+        </div>
+        <div class="field">
+          <label>Instagram username</label>
+          <input type="text" data-field="settings.instagram" placeholder="printpop3d">
+          <div class="hint">Without the @.</div>
+        </div>
+      </div>
+
+      <div class="card-box">
+        <h2>WhatsApp</h2>
+        <p class="sub">WhatsApp is the only one that can pre-fill the order message, so it becomes the main button once you switch it on.</p>
+        <label class="check">
+          <input type="checkbox" data-field="settings.whatsappEnabled">
+          <span>Show WhatsApp on the site</span>
+        </label>
+        <div class="field">
+          <label>WhatsApp number</label>
+          <input type="text" data-field="settings.whatsapp" inputmode="numeric" placeholder="9613123456">
+          <div class="hint">Country code first, no + and no spaces. Lebanese 03 123 456 becomes 9613123456.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- ACCOUNT ---------- -->
+    <section class="panel" id="panel-account">
+      <div class="card-box">
+        <h2>Change your password</h2>
+        <div class="notice err" id="pwErr"></div>
+        <div class="notice ok" id="pwOk"></div>
+        <div class="field"><label>Current password</label><input type="password" id="pwCurrent" autocomplete="current-password"></div>
+        <div class="field"><label>New password</label><input type="password" id="pwNext" autocomplete="new-password"></div>
+        <div class="field"><label>Type the new one again</label><input type="password" id="pwNext2" autocomplete="new-password"></div>
+        <button class="btn btn-primary" id="pwBtn">Update password</button>
+      </div>
+
+      <div class="card-box">
+        <h2>Start over</h2>
+        <p class="sub">Puts every product and all the text back to how the site shipped. Your uploaded photos stay on the server.</p>
+        <button class="btn btn-danger" id="resetBtn">Reset the whole site</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="savebar">
+    <span class="msg" id="saveMsg"></span>
+    <button class="btn btn-ghost btn-sm" id="revertBtn">Undo my changes</button>
+    <button class="btn btn-primary" id="saveBtn">Save changes</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="filePicker" accept="image/*" class="hidden">
+<script src="/admin.js"></script>
+</body>
+</html>
