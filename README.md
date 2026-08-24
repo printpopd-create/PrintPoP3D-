@@ -55,12 +55,21 @@ which lets you set a new one.
 
 
 ### Messages tab
-Everything customers send from the form on your shop page.
+Real back-and-forth conversations with customers, like a chat app.
 
-- Unread messages get a **red badge** on the tab and a glowing border
+There's a **chat bubble** in the corner of your shop. A customer taps it,
+leaves their name and contact, and writes. It lands here and **you reply
+straight back** — their window updates within seconds without them refreshing.
+
+- Conversations needing a reply get a **red badge** on the tab
 - Their phone number becomes a **tappable WhatsApp link**, and an `@handle`
-  becomes an Instagram link — so replying is one tap
-- Mark read/unread, or delete
+  becomes an Instagram link, in case you'd rather move the chat there
+- **✓** closes a finished conversation (they can still read it, but not write)
+- **🗑** deletes it for good
+
+Customers don't sign up for anything. Their browser quietly keeps a private
+key to that one conversation, so it's still there when they come back — but
+only on that device and only for that chat.
 
 **Phone notifications.** Press *Turn on notifications* once on each phone you
 want alerts on. After that your phone buzzes the moment someone messages you.
@@ -72,6 +81,11 @@ want alerts on. After that your phone buzzes the moment someone messages you.
 > On Android, it just works in Chrome.
 
 Use *Send me a test* to check it before relying on it.
+
+> Notifications can't reach your phone while the site runs on **localhost** —
+> your phone has no way to reach your computer, and the site only exists while
+> `npm start` is open. The panel tells you this. It starts working once the
+> site is online with an https address.
 
 ### Page text tab
 Every heading and paragraph on the shop, plus the badges, the "how it works"
@@ -133,7 +147,7 @@ Just open the product in the admin and press **Upload photo**.
 | `public/` | The shop page, admin page, styles, your logo |
 | `data/site.json` | **All your products and text live here** |
 | `data/admin.json` | Your password, stored scrambled (created on first login) |
-| `data/messages.json` | Customer messages |
+| `data/chats.json` | Every conversation with customers |
 | `data/push.json` | Notification keys — treat like a password |
 | `data/uploads/` | Photos you upload |
 

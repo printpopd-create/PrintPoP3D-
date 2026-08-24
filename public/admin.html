@@ -132,11 +132,31 @@
       </div>
 
       <div class="msg-toolbar">
-        <span id="msgCount">No messages yet</span>
-        <button class="btn btn-ghost btn-sm" id="markAll">Mark all read</button>
+        <span id="msgCount">No conversations yet</span>
         <button class="btn btn-ghost btn-sm" id="refreshMsgs">Refresh</button>
       </div>
-      <div id="msgList"></div>
+
+      <div class="chat-split">
+        <div class="thread-list" id="threadList"></div>
+
+        <div class="thread-view" id="threadView" hidden>
+          <div class="tv-head">
+            <button class="icon-btn tv-back" id="tvBack" title="Back to all chats">←</button>
+            <div class="tv-who">
+              <b id="tvName"></b>
+              <span id="tvContact"></span>
+            </div>
+            <button class="icon-btn" id="tvClose" title="Close conversation">✓</button>
+            <button class="icon-btn danger" id="tvDelete" title="Delete conversation">🗑</button>
+          </div>
+          <div class="tv-log" id="tvLog"></div>
+          <form class="tv-reply" id="tvReply">
+            <textarea id="tvInput" rows="1" maxlength="1500" placeholder="Write your reply…"></textarea>
+            <button type="submit" class="btn btn-primary btn-sm">Send</button>
+          </form>
+          <p class="tv-closed" id="tvClosedNote" hidden>Closed — reopen it to reply.</p>
+        </div>
+      </div>
     </section>
 
     <!-- ---------- PAGE TEXT ---------- -->

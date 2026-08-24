@@ -9,6 +9,7 @@ const fs = require('node:fs');
 const crypto = require('node:crypto');
 
 const store = require('./lib/store');
+const chat = require('./lib/chat');
 const auth = require('./lib/auth');
 const { escapeHtml, sendJson, sendText, readJsonBody, resolveInside, serveFile } = require('./lib/http');
 const { render } = require('./lib/render');
@@ -67,6 +68,19 @@ function recordMessage(ip) {
   } else {
     rec.count += 1;
   }
+}
+
+/* Tell every registered phone that a customer wrote in. Never awaited —
+   a push failure must not stop the message being saved. */
+function announce(who) {
+  const devices = store.getPush().subs.length;
+  if (!devices) {
+    console.log(`[chat] message from ${who} — no devices registered, nothing sent`);
+    return;
+  }
+  store.notifyDevices().then((sent) =>
+    console.log(`[chat] message from ${who} — notified ${sent}/${devices} device(s)`)
+  );
 }
 
 /* ---------- helpers ---------- */
@@ -196,6 +210,109 @@ async function handleApi(req, res, route) {
     }
 
     return sendJson(res, 200, { ok: true });
+  }
+
+
+  /* ======================= CHAT: customer side ======================= */
+
+  /* Starting a conversation mints a token their browser keeps. */
+  if (route === '/api/chat/start' && method === 'POST') {
+    if (!store.getSite().settings.contactFormEnabled) {
+      return sendJson(res, 403, { error: 'Chat is switched off right now.' });
+    }
+    if (!messageAllowed(clientIp(req))) {
+      return sendJson(res, 429, { error: "You've sent a few already — try again a bit later." });
+    }
+
+    const body = await readJsonBody(req, 32 * 1024);
+    if (typeof body.website === 'string' && body.website.trim()) {
+      return sendJson(res, 200, { threadId: 'ignored', token: 'ignored', thread: { messages: [] } });
+    }
+
+    const name = String(body.name ?? '').trim();
+    const contact = String(body.contact ?? '').trim();
+    const text = String(body.body ?? '').trim();
+
+    if (name.length < 2) return sendJson(res, 400, { error: 'Please tell us your name.' });
+    if (contact.length < 3) return sendJson(res, 400, { error: 'Please leave a phone number or Instagram handle.' });
+    if (text.length < 2) return sendJson(res, 400, { error: 'Please write your message.' });
+
+    const started = chat.startThread({ name, contact, body: text });
+    recordMessage(clientIp(req));
+    announce(name);
+
+    return sendJson(res, 200, started);
+  }
+
+  if (route === '/api/chat/send' && method === 'POST') {
+    const { threadId, token, body } = await readJsonBody(req, 32 * 1024);
+    const text = String(body ?? '').trim();
+    if (text.length < 1) return sendJson(res, 400, { error: 'Type something first.' });
+
+    if (!messageAllowed(clientIp(req))) {
+      return sendJson(res, 429, { error: 'Slow down a moment, then try again.' });
+    }
+
+    const result = chat.customerSend(String(threadId ?? ''), String(token ?? ''), text);
+    if (!result) return sendJson(res, 404, { error: 'This conversation no longer exists.' });
+    if (result.error) return sendJson(res, 403, result);
+
+    recordMessage(clientIp(req));
+    announce(result.thread.name);
+
+    return sendJson(res, 200, result);
+  }
+
+  /* Polled by the customer's open chat window. */
+  if (route === '/api/chat/poll' && method === 'GET') {
+    const url = new URL(req.url, 'http://localhost');
+    const thread = chat.customerRead(
+      url.searchParams.get('threadId') ?? '',
+      url.searchParams.get('token') ?? ''
+    );
+    if (!thread) return sendJson(res, 404, { error: 'This conversation no longer exists.' });
+    return sendJson(res, 200, thread);
+  }
+
+  /* ======================= CHAT: shop side ======================= */
+
+  if (route === '/api/chat/threads' && method === 'GET') {
+    if (!requireAdmin(req, res)) return;
+    return sendJson(res, 200, { threads: chat.listThreads(), unread: chat.unreadCount() });
+  }
+
+  if (route === '/api/chat/open' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+    const { threadId } = await readJsonBody(req, 4096);
+    const thread = chat.openThread(String(threadId ?? ''));
+    if (!thread) return sendJson(res, 404, { error: 'Conversation not found.' });
+    return sendJson(res, 200, { thread, threads: chat.listThreads(), unread: chat.unreadCount() });
+  }
+
+  if (route === '/api/chat/reply' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+    const { threadId, body } = await readJsonBody(req, 32 * 1024);
+    const text = String(body ?? '').trim();
+    if (!text) return sendJson(res, 400, { error: 'Type a reply first.' });
+
+    const thread = chat.shopReply(String(threadId ?? ''), text);
+    if (!thread) return sendJson(res, 404, { error: 'Conversation not found.' });
+    return sendJson(res, 200, { thread, threads: chat.listThreads(), unread: chat.unreadCount() });
+  }
+
+  if (route === '/api/chat/close' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+    const { threadId, closed } = await readJsonBody(req, 4096);
+    const thread = chat.setClosed(String(threadId ?? ''), closed !== false);
+    if (!thread) return sendJson(res, 404, { error: 'Conversation not found.' });
+    return sendJson(res, 200, { thread, threads: chat.listThreads(), unread: chat.unreadCount() });
+  }
+
+  if (route === '/api/chat/delete' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+    const { threadId } = await readJsonBody(req, 4096);
+    chat.deleteThread(String(threadId ?? ''));
+    return sendJson(res, 200, { threads: chat.listThreads(), unread: chat.unreadCount() });
   }
 
   /* --- the public key a phone needs in order to subscribe --- */

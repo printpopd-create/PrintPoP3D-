@@ -1,9 +1,16 @@
 /* ==========================================================================
-   PrintPoP 3D admin — customer inbox and phone notifications.
+   PrintPoP 3D admin — customer conversations and phone notifications.
    Loaded after admin.js, so it reuses $, api(), toast(), notice(), escapeHtml.
    ========================================================================== */
 
-let messages = [];
+let threads = [];
+let openThreadId = null;
+let openThread = null;
+let chatPoll = null;
+
+const POLL_MS = 6000;
+
+/* ---------- small helpers ---------- */
 
 function timeAgo(iso) {
   const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -12,6 +19,10 @@ function timeAgo(iso) {
   if (secs < 86400) return `${Math.floor(secs / 3600)} h ago`;
   if (secs < 604800) return `${Math.floor(secs / 86400)} d ago`;
   return new Date(iso).toLocaleDateString();
+}
+
+function clock(iso) {
+  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 /* Turn a phone number or @handle into something tappable. */
@@ -29,90 +40,205 @@ function contactLink(raw) {
   if (digits.length < 7) return escapeHtml(value);
 
   const cc = (window.site?.settings?.countryCode || '961').replace(/[^0-9]/g, '');
-
-  // A local number ("03 445 221") needs its leading 0 swapped for the country code.
   if (digits.startsWith('0')) digits = cc + digits.replace(/^0+/, '');
-  // A bare local number with no prefix at all ("70123456").
   else if (digits.length <= 8) digits = cc + digits;
 
   return `<a href="https://wa.me/${digits}" target="_blank" rel="noopener">${escapeHtml(value)}</a>`;
 }
 
-function renderMessages() {
-  const host = $('#msgList');
-  const unread = messages.filter((m) => !m.read).length;
+/* ---------- thread list ---------- */
+
+function renderThreads() {
+  const host = $('#threadList');
+  const unread = threads.filter((t) => t.adminUnread > 0).length;
 
   const badge = $('#msgBadge');
   badge.textContent = unread;
   badge.classList.toggle('hidden', unread === 0);
 
-  $('#msgCount').textContent = messages.length
-    ? `${messages.length} message${messages.length === 1 ? '' : 's'}${unread ? ` · ${unread} unread` : ''}`
-    : 'No messages yet';
-  $('#markAll').disabled = unread === 0;
+  $('#msgCount').textContent = threads.length
+    ? `${threads.length} conversation${threads.length === 1 ? '' : 's'}${unread ? ` · ${unread} needing a reply` : ''}`
+    : 'No conversations yet';
 
-  if (!messages.length) {
-    host.innerHTML = '<div class="msg-empty">Nothing yet. Messages sent from your shop page land here.</div>';
+  if (!threads.length) {
+    host.innerHTML =
+      '<div class="msg-empty">Nothing yet. When someone opens the chat on your shop, it appears here.</div>';
     return;
   }
 
-  host.innerHTML = messages
+  host.innerHTML = threads
+    .map(
+      (t) => `
+      <button class="thread${t.adminUnread ? ' unread' : ''}${t.id === openThreadId ? ' active' : ''}${t.closed ? ' closed' : ''}" data-id="${escapeHtml(t.id)}">
+        <div class="thread-top">
+          <b>${escapeHtml(t.name)}</b>
+          <span class="when">${timeAgo(t.lastAt)}</span>
+        </div>
+        <div class="thread-preview">${t.lastFrom === 'shop' ? '<i>You:</i> ' : ''}${escapeHtml(t.preview)}</div>
+        ${t.adminUnread ? `<span class="thread-badge">${t.adminUnread}</span>` : ''}
+        ${t.closed ? '<span class="thread-closed">closed</span>' : ''}
+      </button>`
+    )
+    .join('');
+
+  host.querySelectorAll('.thread').forEach((btn) => {
+    btn.addEventListener('click', () => selectThread(btn.dataset.id));
+  });
+}
+
+/* ---------- one conversation ---------- */
+
+function renderThread() {
+  const view = $('#threadView');
+  const split = document.querySelector('.chat-split');
+
+  if (!openThread) {
+    view.hidden = true;
+    split.classList.remove('viewing');
+    return;
+  }
+
+  view.hidden = false;
+  split.classList.add('viewing');
+
+  $('#tvName').textContent = openThread.name;
+  $('#tvContact').innerHTML = contactLink(openThread.contact);
+  $('#tvClose').textContent = openThread.closed ? '↩' : '✓';
+  $('#tvClose').title = openThread.closed ? 'Reopen conversation' : 'Close conversation';
+
+  $('#tvLog').innerHTML = openThread.messages
     .map(
       (m) => `
-      <div class="inbox-item${m.read ? '' : ' unread'}" data-id="${escapeHtml(m.id)}">
-        <div class="msg-head">
-          <b>${escapeHtml(m.name)}</b>
-          <span class="when">${timeAgo(m.createdAt)}</span>
-        </div>
-        <div class="msg-contact">${contactLink(m.contact)}</div>
-        <div class="msg-body">${escapeHtml(m.body)}</div>
-        <div class="msg-actions">
-          <button class="btn btn-ghost btn-sm js-read">${m.read ? 'Mark unread' : 'Mark read'}</button>
-          <button class="btn btn-danger btn-sm js-del">Delete</button>
-        </div>
+      <div class="tv-msg ${m.from === 'shop' ? 'from-shop' : 'from-customer'}">
+        <div class="tv-text">${escapeHtml(m.body)}</div>
+        <time>${clock(m.at)}</time>
       </div>`
     )
     .join('');
 
-  host.querySelectorAll('.inbox-item').forEach((el) => {
-    const id = el.dataset.id;
-    const current = messages.find((m) => m.id === id);
-
-    el.querySelector('.js-read').addEventListener('click', async () => {
-      const res = await api('POST', '/api/messages/read', { id, read: !current.read });
-      messages = res.messages;
-      renderMessages();
-    });
-
-    el.querySelector('.js-del').addEventListener('click', async () => {
-      if (!confirm(`Delete the message from ${current.name}?`)) return;
-      const res = await api('POST', '/api/messages/delete', { id });
-      messages = res.messages;
-      renderMessages();
-      toast('Message deleted');
-    });
-  });
+  $('#tvLog').scrollTop = $('#tvLog').scrollHeight;
+  $('#tvClosedNote').hidden = !openThread.closed;
+  $('#tvReply').hidden = Boolean(openThread.closed);
 }
 
-async function loadMessages() {
+async function selectThread(id) {
   try {
-    const res = await api('GET', '/api/messages');
-    messages = res.messages;
-    renderMessages();
+    const res = await api('POST', '/api/chat/open', { threadId: id });
+    openThreadId = id;
+    openThread = res.thread;
+    threads = res.threads;
+    renderThreads();
+    renderThread();
+    setTimeout(() => $('#tvInput')?.focus(), 60);
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+async function loadThreads({ keepOpen = true } = {}) {
+  try {
+    const res = await api('GET', '/api/chat/threads');
+    threads = res.threads;
+    renderThreads();
+
+    // refresh the open conversation so new replies appear without a click
+    if (keepOpen && openThreadId) {
+      const still = threads.find((t) => t.id === openThreadId);
+      if (!still) {
+        openThreadId = null;
+        openThread = null;
+        renderThread();
+      } else if (openThread && still.messageCount !== openThread.messages.length) {
+        const fresh = await api('POST', '/api/chat/open', { threadId: openThreadId });
+        openThread = fresh.thread;
+        threads = fresh.threads;
+        renderThreads();
+        renderThread();
+      }
+    }
   } catch {
     /* not fatal — the rest of the admin keeps working */
   }
 }
 
-$('#markAll').addEventListener('click', async () => {
-  const res = await api('POST', '/api/messages/read', { all: true });
-  messages = res.messages;
-  renderMessages();
-});
+/* Poll only while the Messages tab is actually on screen. */
+function setChatPolling(on) {
+  clearInterval(chatPoll);
+  if (on) chatPoll = setInterval(() => loadThreads(), POLL_MS);
+}
+
+/* ---------- actions ---------- */
 
 $('#refreshMsgs').addEventListener('click', async () => {
-  await loadMessages();
+  await loadThreads();
   toast('Refreshed');
+});
+
+$('#tvBack').addEventListener('click', () => {
+  openThreadId = null;
+  openThread = null;
+  renderThreads();
+  renderThread();
+});
+
+$('#tvReply').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = $('#tvInput');
+  const text = input.value.trim();
+  if (!text || !openThreadId) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  try {
+    const res = await api('POST', '/api/chat/reply', { threadId: openThreadId, body: text });
+    openThread = res.thread;
+    threads = res.threads;
+    renderThreads();
+    renderThread();
+  } catch (err) {
+    input.value = text;              // hand their typing back
+    toast(err.message);
+  }
+});
+
+$('#tvInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    $('#tvReply').requestSubmit();
+  }
+});
+
+$('#tvInput').addEventListener('input', () => {
+  const input = $('#tvInput');
+  input.style.height = 'auto';
+  input.style.height = `${Math.min(input.scrollHeight, 120)}px`;
+});
+
+$('#tvClose').addEventListener('click', async () => {
+  if (!openThread) return;
+  const res = await api('POST', '/api/chat/close', {
+    threadId: openThreadId,
+    closed: !openThread.closed,
+  });
+  openThread = res.thread;
+  threads = res.threads;
+  renderThreads();
+  renderThread();
+  toast(openThread.closed ? 'Conversation closed' : 'Conversation reopened');
+});
+
+$('#tvDelete').addEventListener('click', async () => {
+  if (!openThread) return;
+  if (!confirm(`Delete the whole conversation with ${openThread.name}? This cannot be undone.`)) return;
+
+  const res = await api('POST', '/api/chat/delete', { threadId: openThreadId });
+  threads = res.threads;
+  openThreadId = null;
+  openThread = null;
+  renderThreads();
+  renderThread();
+  toast('Conversation deleted');
 });
 
 /* ==========================================================================
@@ -127,6 +253,9 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 const isInstalled =
   window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
+/* Push can only reach a phone if the phone can reach the site. */
+const isLocal = ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
+
 function base64UrlToBytes(value) {
   const padding = (4 - (value.length % 4)) % 4;
   const base64 = value.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat(padding);
@@ -140,23 +269,21 @@ async function currentSubscription() {
   return reg ? reg.pushManager.getSubscription() : null;
 }
 
-/* Push can only reach a phone if the phone can reach the site. */
-const isLocal = ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
-
 async function refreshPushUi() {
   const btn = $('#pushBtn');
   const test = $('#pushTest');
   const hint = $('#pushHint');
   const sub2 = $('#pushSub');
 
-  // How many devices the server thinks are listening.
   let devices = null;
   try { devices = (await api('GET', '/api/push/key')).devices; } catch { /* not logged in yet */ }
-  sub2.textContent = devices === null
-    ? 'Get a notification the moment someone messages you.'
-    : devices === 0
-      ? 'No devices are set up yet — nothing will buzz until you turn this on.'
-      : `${devices} device${devices === 1 ? '' : 's'} will buzz when a customer messages you.`;
+
+  sub2.textContent =
+    devices === null
+      ? 'Get a notification the moment someone messages you.'
+      : devices === 0
+        ? 'No devices are set up yet — nothing will buzz until you turn this on.'
+        : `${devices} device${devices === 1 ? '' : 's'} will buzz when a customer messages you.`;
 
   if (isLocal) {
     btn.disabled = true;
@@ -267,7 +394,20 @@ $('#pushTest').addEventListener('click', async () => {
   }
 });
 
-/* Pick up new messages when you come back to the tab. */
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && site) loadMessages();
+/* Only poll while the Messages tab is the one being looked at. */
+window.$$('.tab').forEach((tab) => {
+  tab.addEventListener('click', () => {
+    const onMessages = tab.dataset.tab === 'messages';
+    setChatPolling(onMessages);
+    if (onMessages) loadThreads();
+  });
 });
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && window.site) loadThreads();
+});
+
+/* admin.js calls this once you're logged in */
+function loadMessages() {
+  return loadThreads();
+}
