@@ -14,7 +14,7 @@ const STATUS_LABEL = { in_stock: 'In stock', sold_out: 'Sold out', preorder: 'Pr
 
 /* Shared with admin-messages.js */
 window.$ = $;
-window.$ = $;
+window.$$ = $$;
 
 /* ---------- tiny helpers ---------- */
 

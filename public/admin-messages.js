@@ -140,10 +140,34 @@ async function currentSubscription() {
   return reg ? reg.pushManager.getSubscription() : null;
 }
 
+/* Push can only reach a phone if the phone can reach the site. */
+const isLocal = ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
+
 async function refreshPushUi() {
   const btn = $('#pushBtn');
   const test = $('#pushTest');
   const hint = $('#pushHint');
+  const sub2 = $('#pushSub');
+
+  // How many devices the server thinks are listening.
+  let devices = null;
+  try { devices = (await api('GET', '/api/push/key')).devices; } catch { /* not logged in yet */ }
+  sub2.textContent = devices === null
+    ? 'Get a notification the moment someone messages you.'
+    : devices === 0
+      ? 'No devices are set up yet — nothing will buzz until you turn this on.'
+      : `${devices} device${devices === 1 ? '' : 's'} will buzz when a customer messages you.`;
+
+  if (isLocal) {
+    btn.disabled = true;
+    btn.textContent = 'Put the site online first';
+    hint.innerHTML =
+      'You are viewing this at <b>localhost</b>, which only exists on this computer — your phone ' +
+      'has no way to reach it, and the site is only running while <b>npm start</b> is open. ' +
+      'Notifications start working once the site is deployed with a real https address.';
+    test.classList.add('hidden');
+    return;
+  }
 
   if (!pushSupported) {
     btn.disabled = true;

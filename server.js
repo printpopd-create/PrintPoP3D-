@@ -183,7 +183,17 @@ async function handleApi(req, res, route) {
 
     store.addMessage({ name, contact, body: text });
     recordMessage(clientIp(req));
-    store.notifyDevices();   // deliberately not awaited
+
+    // Not awaited — a push failure must never stop a message being saved.
+    // Logged so the reason is visible in the host's logs.
+    const devices = store.getPush().subs.length;
+    if (!devices) {
+      console.log(`[message] from ${name} — no devices registered, no notification sent`);
+    } else {
+      store.notifyDevices().then((sent) =>
+        console.log(`[message] from ${name} — notified ${sent}/${devices} device(s)`)
+      );
+    }
 
     return sendJson(res, 200, { ok: true });
   }
@@ -191,7 +201,8 @@ async function handleApi(req, res, route) {
   /* --- the public key a phone needs in order to subscribe --- */
   if (route === '/api/push/key' && method === 'GET') {
     if (!isAuthed(req)) return sendJson(res, 401, { error: 'Please log in again.' });
-    return sendJson(res, 200, { publicKey: store.getPush().keys.publicKey });
+    const state = store.getPush();
+    return sendJson(res, 200, { publicKey: state.keys.publicKey, devices: state.subs.length });
   }
 
   if (route === '/api/messages' && method === 'GET') {
