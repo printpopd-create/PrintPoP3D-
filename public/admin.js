@@ -10,6 +10,12 @@ let saved = null;     // last version the server confirmed
 let dirty = false;
 let openProduct = null;
 
+const STATUS_LABEL = { in_stock: 'In stock', sold_out: 'Sold out', preorder: 'Pre-order' };
+
+/* Shared with admin-messages.js */
+window.$ = $;
+window.$ = $;
+
 /* ---------- tiny helpers ---------- */
 
 async function api(method, url, body) {
@@ -31,6 +37,7 @@ async function api(method, url, body) {
 }
 
 let toastTimer;
+window.api = api;
 function toast(msg) {
   const el = $('#toast');
   el.textContent = msg;
@@ -44,6 +51,9 @@ function notice(id, msg, show = true) {
   el.textContent = msg;
   el.classList.toggle('show', show && Boolean(msg));
 }
+
+window.toast = toast;
+window.notice = notice;
 
 function markDirty(value = true) {
   dirty = value;
@@ -129,10 +139,14 @@ async function openEditor() {
   $('#gate').classList.add('hidden');
   $('#app').classList.remove('hidden');
 
+  window.site = site;
   renderSteps();
   renderProducts();
   bindFields();
   markDirty(false);
+
+  // inbox + notification state live in admin-messages.js
+  if (typeof loadMessages === 'function') { loadMessages(); refreshPushUi(); }
 }
 
 /* --- tabs --- */
@@ -200,6 +214,7 @@ function escapeHtml(v) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 const escapeAttr = escapeHtml;
+window.escapeHtml = escapeHtml;
 
 function renderProducts() {
   const host = $('#prodList');
@@ -223,7 +238,7 @@ function renderProducts() {
       <div class="prod-head">
         ${thumb}
         <div class="t">
-          <b>${escapeHtml(p.name || 'Untitled')}</b>
+          <b>${escapeHtml(p.name || 'Untitled')}<span class="pill pill-${p.status || 'in_stock'}">${STATUS_LABEL[p.status] || 'In stock'}</span></b>
           <span>${p.price ? escapeHtml(site.settings.currency + p.price) : 'No price'}${p.hidden ? ' · hidden' : ''}</span>
         </div>
         <button class="icon-btn js-up" title="Move up" ${index === 0 ? 'disabled' : ''}>↑</button>
@@ -252,6 +267,16 @@ function renderProducts() {
           <textarea class="js-specs" placeholder="One per line">${escapeHtml(p.specs.join('\n'))}</textarea>
           <div class="hint">One per line — these show as small pills, e.g. "10+ colors".</div>
         </div>
+        <div class="field">
+          <label>Availability</label>
+          <div class="status-row">
+            ${Object.entries(STATUS_LABEL).map(([key, text]) => `
+              <label class="status-opt">
+                <input type="radio" name="status-${p.id}" class="js-status" value="${key}" ${(p.status || 'in_stock') === key ? 'checked' : ''}>
+                <span>${text}</span>
+              </label>`).join('')}
+          </div>
+        </div>
         <label class="check">
           <input type="checkbox" class="js-hidden" ${p.hidden ? 'checked' : ''}>
           <span>Hide this product from the shop</span>
@@ -278,6 +303,12 @@ function renderProducts() {
       p.specs = e.target.value.split('\n').map((s) => s.trim()).filter(Boolean);
       markDirty();
     });
+    el.querySelectorAll('.js-status').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        if (radio.checked) { p.status = radio.value; markDirty(); renderProducts(); }
+      });
+    });
+
     el.querySelector('.js-hidden')?.addEventListener('change', (e) => {
       p.hidden = e.target.checked; markDirty(); renderProducts();
     });
@@ -314,7 +345,7 @@ $('#addProd').addEventListener('click', () => {
   const id = `p-${Date.now().toString(36)}`;
   site.products.push({
     id, name: 'New product', desc: '', price: '', unit: 'each',
-    tag: '', specs: [], image: '', hidden: false,
+    tag: '', specs: [], image: '', status: 'in_stock', hidden: false,
   });
   openProduct = id;
   markDirty();

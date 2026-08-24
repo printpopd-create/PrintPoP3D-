@@ -1,12 +1,15 @@
 # dependencies
 node_modules/
 
-# your private data — never commit these
-data/admin.json
-data/site.json
-data/uploads/
-data/*.tmp
+# Everything private lives here and must never reach GitHub:
+#   site.json     your products, text and phone number
+#   admin.json    your password hash
+#   push.json     the private key that signs your notifications
+#   messages.json customer names and phone numbers
+#   uploads/      your product photos
+data/
 
 # editor / OS noise
 .DS_Store
 Thumbs.db
+.tmp/

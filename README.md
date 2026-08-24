@@ -48,7 +48,30 @@ which lets you set a new one.
   straight away. It gets shrunk automatically so the page stays fast.
 - Move products up and down to reorder the shop
 - **Hide** a product instead of deleting it (useful when you're out of filament)
+- Set each product to **In stock**, **Sold out** or **Pre-order** — the label
+  shows on the shop, sold-out items go grey, and the order message changes to
+  match ("Is it coming back in stock?" instead of "I'd like to order")
 - Turn the bundle deal on or off and set its price
+
+
+### Messages tab
+Everything customers send from the form on your shop page.
+
+- Unread messages get a **red badge** on the tab and a glowing border
+- Their phone number becomes a **tappable WhatsApp link**, and an `@handle`
+  becomes an Instagram link — so replying is one tap
+- Mark read/unread, or delete
+
+**Phone notifications.** Press *Turn on notifications* once on each phone you
+want alerts on. After that your phone buzzes the moment someone messages you.
+
+> **On iPhone this only works if you install the site first.** Open the admin
+> in Safari, tap **Share**, choose **Add to Home Screen**, then open PrintPoP
+> from your home screen and turn notifications on from there. Apple does not
+> allow website notifications any other way. Needs iOS 16.4 or newer.
+> On Android, it just works in Chrome.
+
+Use *Send me a test* to check it before relying on it.
 
 ### Page text tab
 Every heading and paragraph on the shop, plus the badges, the "how it works"
@@ -58,7 +81,9 @@ steps, and the footer.
 > `Fidgets, *ready to print*` makes the second half glow.
 
 ### Contact tab
-Your TikTok and Instagram usernames, and your WhatsApp number.
+Your TikTok and Instagram usernames, your WhatsApp number, and your country
+code (961 for Lebanon — it turns local numbers customers leave you into working
+WhatsApp links). You can also switch the message form on your shop on or off.
 
 **Leave one empty and its buttons disappear from the whole site.** So when you
 open the Instagram account, just type the username here and it switches on
@@ -108,6 +133,8 @@ Just open the product in the admin and press **Upload photo**.
 | `public/` | The shop page, admin page, styles, your logo |
 | `data/site.json` | **All your products and text live here** |
 | `data/admin.json` | Your password, stored scrambled (created on first login) |
+| `data/messages.json` | Customer messages |
+| `data/push.json` | Notification keys — treat like a password |
 | `data/uploads/` | Photos you upload |
 
 ### Backing up
@@ -148,7 +175,8 @@ Whatever you choose, set these:
 - Start command: `npm start`
 - The host provides the port automatically via the `PORT` variable — the site
   already reads it
-- Mount the persistent disk at the `data` folder
+- Mount the persistent disk at the `data` folder (or point the `DATA_DIR`
+  variable wherever your host mounted it)
 - Turn HTTPS on
 
 Ask me when you're ready and I'll walk you through whichever host you pick.
@@ -162,3 +190,4 @@ Ask me when you're ready and I'll walk you through whichever host you pick.
 - [ ] Check the prices are what you actually want to charge
 - [ ] Add your WhatsApp number once you have the business line
 - [ ] Copy the `data` folder somewhere safe
+- [ ] Turn on notifications on your phone, and send yourself a test

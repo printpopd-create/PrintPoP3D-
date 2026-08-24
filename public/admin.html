@@ -6,6 +6,12 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Admin — PrintPoP 3D</title>
 <link rel="icon" href="/assets/logo.jpeg">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PrintPoP">
+<link rel="apple-touch-icon" href="/assets/logo.jpeg">
+<meta name="theme-color" content="#05060A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -69,6 +75,7 @@
 
   <div class="tabs">
     <button class="tab active" data-tab="products">Products</button>
+    <button class="tab" data-tab="messages">Messages <span class="badge hidden" id="msgBadge">0</span></button>
     <button class="tab" data-tab="text">Page text</button>
     <button class="tab" data-tab="contact">Contact</button>
     <button class="tab" data-tab="account">Password</button>
@@ -108,6 +115,28 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- ---------- MESSAGES ---------- -->
+    <section class="panel" id="panel-messages">
+      <div class="card-box" id="pushBox">
+        <h2>Phone notifications</h2>
+        <p class="sub" id="pushSub">Get a notification the moment someone messages you.</p>
+        <div class="notice err" id="pushErr"></div>
+        <div class="notice ok" id="pushOk"></div>
+        <div class="push-actions">
+          <button class="btn btn-primary" id="pushBtn">Turn on notifications</button>
+          <button class="btn btn-ghost btn-sm hidden" id="pushTest">Send me a test</button>
+        </div>
+        <p class="hint" id="pushHint" style="margin-top:14px"></p>
+      </div>
+
+      <div class="msg-toolbar">
+        <span id="msgCount">No messages yet</span>
+        <button class="btn btn-ghost btn-sm" id="markAll">Mark all read</button>
+        <button class="btn btn-ghost btn-sm" id="refreshMsgs">Refresh</button>
+      </div>
+      <div id="msgList"></div>
     </section>
 
     <!-- ---------- PAGE TEXT ---------- -->
@@ -181,6 +210,17 @@
       </div>
 
       <div class="card-box">
+        <h2>Message form on the shop</h2>
+        <p class="sub">A form on your shop page so people can message you without having Instagram or WhatsApp.</p>
+        <label class="check">
+          <input type="checkbox" data-field="settings.contactFormEnabled">
+          <span>Show the message form</span>
+        </label>
+        <div class="field"><label>Heading</label><input type="text" data-field="settings.contactHeading"></div>
+        <div class="field"><label>Text</label><textarea data-field="settings.contactText"></textarea></div>
+      </div>
+
+      <div class="card-box">
         <h2>WhatsApp</h2>
         <p class="sub">WhatsApp is the only one that can pre-fill the order message, so it becomes the main button once you switch it on.</p>
         <label class="check">
@@ -191,6 +231,11 @@
           <label>WhatsApp number</label>
           <input type="text" data-field="settings.whatsapp" inputmode="numeric" placeholder="9613123456">
           <div class="hint">Country code first, no + and no spaces. Lebanese 03 123 456 becomes 9613123456.</div>
+        </div>
+        <div class="field">
+          <label>Your country code</label>
+          <input type="text" data-field="settings.countryCode" inputmode="numeric" style="max-width:140px">
+          <div class="hint">Used to turn local numbers customers leave you (like 03 445 221) into working WhatsApp links. Lebanon is 961.</div>
         </div>
       </div>
     </section>
@@ -226,5 +271,6 @@
 <div class="toast" id="toast"></div>
 <input type="file" id="filePicker" accept="image/*" class="hidden">
 <script src="/admin.js"></script>
+<script src="/admin-messages.js"></script>
 </body>
 </html>

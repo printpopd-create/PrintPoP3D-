@@ -1,0 +1,14 @@
+{
+  "name": "PrintPoP 3D Admin",
+  "short_name": "PrintPoP",
+  "description": "Manage the PrintPoP 3D shop and read customer messages",
+  "start_url": "/admin",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#05060A",
+  "theme_color": "#05060A",
+  "icons": [
+    { "src": "/assets/logo.jpeg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any" },
+    { "src": "/assets/logo.jpeg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any" }
+  ]
+}

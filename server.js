@@ -45,6 +45,30 @@ function sniffImage(buf) {
   return null;
 }
 
+
+/* ---------- message flood protection ---------- */
+
+const msgHits = new Map();
+const MSG_WINDOW_MS = 10 * 60_000;
+const MSG_MAX = 5;
+
+function messageAllowed(ip) {
+  const rec = msgHits.get(ip);
+  if (!rec || Date.now() - rec.first > MSG_WINDOW_MS) return true;
+  return rec.count < MSG_MAX;
+}
+
+/* Only messages we actually keep count against the limit, so somebody
+   fumbling the form doesn't get locked out of their own enquiry. */
+function recordMessage(ip) {
+  const rec = msgHits.get(ip);
+  if (!rec || Date.now() - rec.first > MSG_WINDOW_MS) {
+    msgHits.set(ip, { count: 1, first: Date.now() });
+  } else {
+    rec.count += 1;
+  }
+}
+
 /* ---------- helpers ---------- */
 
 function isAuthed(req) {
@@ -128,6 +152,93 @@ async function handleApi(req, res, route) {
 
   if (route === '/api/logout' && method === 'POST') {
     return sendJson(res, 200, { ok: true }, { 'Set-Cookie': auth.sessionCookie('', isSecure(req)) });
+  }
+
+
+  /* --- a customer sends a message (public, throttled) --- */
+  if (route === '/api/message' && method === 'POST') {
+    const site = store.getSite();
+    if (!site.settings.contactFormEnabled) {
+      return sendJson(res, 403, { error: 'The message form is switched off.' });
+    }
+
+    if (!messageAllowed(clientIp(req))) {
+      return sendJson(res, 429, { error: "You've sent a few already — try again a bit later." });
+    }
+
+    const body = await readJsonBody(req, 32 * 1024);
+
+    // Hidden field real people never see, let alone fill in.
+    if (typeof body.website === 'string' && body.website.trim()) {
+      return sendJson(res, 200, { ok: true }); // quietly swallow the bot
+    }
+
+    const name = String(body.name ?? '').trim();
+    const contact = String(body.contact ?? '').trim();
+    const text = String(body.body ?? '').trim();
+
+    if (name.length < 2) return sendJson(res, 400, { error: 'Please tell us your name.' });
+    if (contact.length < 3) return sendJson(res, 400, { error: 'Please leave a phone number or Instagram handle.' });
+    if (text.length < 5) return sendJson(res, 400, { error: 'Please write your message.' });
+
+    store.addMessage({ name, contact, body: text });
+    recordMessage(clientIp(req));
+    store.notifyDevices();   // deliberately not awaited
+
+    return sendJson(res, 200, { ok: true });
+  }
+
+  /* --- the public key a phone needs in order to subscribe --- */
+  if (route === '/api/push/key' && method === 'GET') {
+    if (!isAuthed(req)) return sendJson(res, 401, { error: 'Please log in again.' });
+    return sendJson(res, 200, { publicKey: store.getPush().keys.publicKey });
+  }
+
+  if (route === '/api/messages' && method === 'GET') {
+    if (!requireAdmin(req, res)) return;
+    return sendJson(res, 200, { messages: store.getMessages(), unread: store.unreadCount() });
+  }
+
+  if (route === '/api/messages/unread' && method === 'GET') {
+    if (!isAuthed(req)) return sendJson(res, 401, { error: 'Please log in again.' });
+    return sendJson(res, 200, { unread: store.unreadCount() });
+  }
+
+  if (route === '/api/messages/read' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+    const { id, all, read } = await readJsonBody(req, 4096);
+    if (all) return sendJson(res, 200, { messages: store.markAllRead(), unread: 0 });
+    store.markMessage(String(id ?? ''), read !== false);
+    return sendJson(res, 200, { messages: store.getMessages(), unread: store.unreadCount() });
+  }
+
+  if (route === '/api/messages/delete' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+    const { id } = await readJsonBody(req, 4096);
+    store.deleteMessage(String(id ?? ''));
+    return sendJson(res, 200, { messages: store.getMessages(), unread: store.unreadCount() });
+  }
+
+  if (route === '/api/push/subscribe' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+    const { subscription } = await readJsonBody(req, 16 * 1024);
+    if (!store.addSubscription(subscription)) {
+      return sendJson(res, 400, { error: "That device couldn't be registered." });
+    }
+    return sendJson(res, 200, { ok: true, devices: store.getPush().subs.length });
+  }
+
+  if (route === '/api/push/unsubscribe' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+    const { endpoint } = await readJsonBody(req, 16 * 1024);
+    store.removeSubscriptions(String(endpoint ?? ''));
+    return sendJson(res, 200, { ok: true, devices: store.getPush().subs.length });
+  }
+
+  if (route === '/api/push/test' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+    const sent = await store.notifyDevices();
+    return sendJson(res, 200, { sent });
   }
 
   /* --- everything below needs a login --- */

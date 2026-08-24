@@ -38,9 +38,16 @@ document.querySelectorAll('.js-order').forEach((link) => {
     const price = host?.dataset.price;
     const currency = document.body.dataset.currency || '$';
 
-    const msg = price
-      ? `Hi! I'd like to order the ${product} (${currency}${price}). Is it available?`
-      : `Hi! I'd like to order the ${product}.`;
+    const status = host?.dataset.status || 'in_stock';
+    const priced = price ? ` (${currency}${price})` : '';
+
+    // Must match the WhatsApp wording in lib/render.js
+    const msg =
+      status === 'sold_out'
+        ? `Hi! Is the ${product}${priced} coming back in stock?`
+        : status === 'preorder'
+          ? `Hi! I'd like to pre-order the ${product}${priced}.`
+          : `Hi! I'd like to order the ${product}${priced}. Is it available?`;
 
     copyText(msg)
       .then(() => showToast('✅ Message copied — just paste it in the DM!'))
@@ -61,3 +68,50 @@ const io = new IntersectionObserver(
 );
 
 document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+/* ==========================================================================
+   Customer message form
+   ========================================================================== */
+const msgForm = document.getElementById('msgForm');
+
+if (msgForm) {
+  const status = document.getElementById('msgStatus');
+  const submit = msgForm.querySelector('button[type=submit]');
+
+  msgForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.className = 'msg-status';
+    status.textContent = '';
+
+    const payload = Object.fromEntries(new FormData(msgForm).entries());
+
+    if (!payload.name?.trim() || !payload.contact?.trim() || !payload.body?.trim()) {
+      status.className = 'msg-status err';
+      status.textContent = 'Please fill in all three boxes.';
+      return;
+    }
+
+    try {
+      submit.disabled = true;
+      submit.textContent = 'Sending…';
+
+      const res = await fetch('/api/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not send that.');
+
+      msgForm.reset();
+      status.className = 'msg-status ok';
+      status.textContent = "✅ Sent! We'll get back to you soon.";
+    } catch (err) {
+      status.className = 'msg-status err';
+      status.textContent = err.message;
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Send message';
+    }
+  });
+}
