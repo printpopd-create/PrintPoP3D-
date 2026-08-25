@@ -12,10 +12,6 @@ let openProduct = null;
 
 const STATUS_LABEL = { in_stock: 'In stock', sold_out: 'Sold out', preorder: 'Pre-order' };
 
-/* Shared with admin-messages.js */
-window.$ = $;
-window.$$ = $$;
-
 /* ---------- tiny helpers ---------- */
 
 async function api(method, url, body) {
@@ -37,7 +33,6 @@ async function api(method, url, body) {
 }
 
 let toastTimer;
-window.api = api;
 function toast(msg) {
   const el = $('#toast');
   el.textContent = msg;
@@ -51,9 +46,6 @@ function notice(id, msg, show = true) {
   el.textContent = msg;
   el.classList.toggle('show', show && Boolean(msg));
 }
-
-window.toast = toast;
-window.notice = notice;
 
 function markDirty(value = true) {
   dirty = value;
@@ -139,14 +131,10 @@ async function openEditor() {
   $('#gate').classList.add('hidden');
   $('#app').classList.remove('hidden');
 
-  window.site = site;
   renderSteps();
   renderProducts();
   bindFields();
   markDirty(false);
-
-  // inbox + notification state live in admin-messages.js
-  if (typeof loadMessages === 'function') { loadMessages(); refreshPushUi(); }
 }
 
 /* --- tabs --- */
@@ -214,7 +202,6 @@ function escapeHtml(v) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 const escapeAttr = escapeHtml;
-window.escapeHtml = escapeHtml;
 
 function renderProducts() {
   const host = $('#prodList');

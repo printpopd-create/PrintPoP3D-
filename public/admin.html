@@ -6,11 +6,6 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Admin — PrintPoP 3D</title>
 <link rel="icon" href="/assets/logo.jpeg">
-<link rel="manifest" href="/manifest.webmanifest">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="PrintPoP">
-<link rel="apple-touch-icon" href="/assets/logo.jpeg">
 <meta name="theme-color" content="#05060A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,7 +70,6 @@
 
   <div class="tabs">
     <button class="tab active" data-tab="products">Products</button>
-    <button class="tab" data-tab="messages">Messages <span class="badge hidden" id="msgBadge">0</span></button>
     <button class="tab" data-tab="text">Page text</button>
     <button class="tab" data-tab="contact">Contact</button>
     <button class="tab" data-tab="account">Password</button>
@@ -113,48 +107,6 @@
             <input type="text" data-field="settings.bundleCompare" inputmode="decimal">
             <div class="hint">Leave empty for no discount line.</div>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- MESSAGES ---------- -->
-    <section class="panel" id="panel-messages">
-      <div class="card-box" id="pushBox">
-        <h2>Phone notifications</h2>
-        <p class="sub" id="pushSub">Get a notification the moment someone messages you.</p>
-        <div class="notice err" id="pushErr"></div>
-        <div class="notice ok" id="pushOk"></div>
-        <div class="push-actions">
-          <button class="btn btn-primary" id="pushBtn">Turn on notifications</button>
-          <button class="btn btn-ghost btn-sm hidden" id="pushTest">Send me a test</button>
-        </div>
-        <p class="hint" id="pushHint" style="margin-top:14px"></p>
-      </div>
-
-      <div class="msg-toolbar">
-        <span id="msgCount">No conversations yet</span>
-        <button class="btn btn-ghost btn-sm" id="refreshMsgs">Refresh</button>
-      </div>
-
-      <div class="chat-split">
-        <div class="thread-list" id="threadList"></div>
-
-        <div class="thread-view" id="threadView" hidden>
-          <div class="tv-head">
-            <button class="icon-btn tv-back" id="tvBack" title="Back to all chats">←</button>
-            <div class="tv-who">
-              <b id="tvName"></b>
-              <span id="tvContact"></span>
-            </div>
-            <button class="icon-btn" id="tvClose" title="Close conversation">✓</button>
-            <button class="icon-btn danger" id="tvDelete" title="Delete conversation">🗑</button>
-          </div>
-          <div class="tv-log" id="tvLog"></div>
-          <form class="tv-reply" id="tvReply">
-            <textarea id="tvInput" rows="1" maxlength="1500" placeholder="Write your reply…"></textarea>
-            <button type="submit" class="btn btn-primary btn-sm">Send</button>
-          </form>
-          <p class="tv-closed" id="tvClosedNote" hidden>Closed — reopen it to reply.</p>
         </div>
       </div>
     </section>
@@ -230,17 +182,6 @@
       </div>
 
       <div class="card-box">
-        <h2>Customer chat</h2>
-        <p class="sub">The chat bubble in the corner of your shop, where customers can message you and you reply back. Switch it off and it disappears completely — your saved conversations stay safe in the admin.</p>
-        <label class="check">
-          <input type="checkbox" data-field="settings.contactFormEnabled">
-          <span>Show the chat on my shop</span>
-        </label>
-        <div class="field"><label>Heading</label><input type="text" data-field="settings.contactHeading"></div>
-        <div class="field"><label>Text</label><textarea data-field="settings.contactText"></textarea></div>
-      </div>
-
-      <div class="card-box">
         <h2>WhatsApp</h2>
         <p class="sub">WhatsApp is the only one that can pre-fill the order message, so it becomes the main button once you switch it on.</p>
         <label class="check">
@@ -291,6 +232,5 @@
 <div class="toast" id="toast"></div>
 <input type="file" id="filePicker" accept="image/*" class="hidden">
 <script src="/admin.js"></script>
-<script src="/admin-messages.js"></script>
 </body>
 </html>

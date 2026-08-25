@@ -161,33 +161,6 @@ section{padding:76px 0;scroll-margin-top:76px}
 .card.is-sold-out .shot img{filter:grayscale(.75) brightness(.68)}
 .card.is-sold-out .price{color:var(--muted)}
 
-/* ---------- customer message form ---------- */
-.msgbox{
-  margin-top:26px;background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--radius);padding:32px 30px;max-width:820px;margin-inline:auto;
-}
-.msgbox h3{font-size:clamp(1.3rem,3.6vw,1.75rem);text-align:center}
-.msgbox > p{color:var(--muted);text-align:center;margin:10px auto 24px;max-width:460px;font-size:15.5px}
-.msgbox label{display:block;margin-bottom:14px}
-.msgbox label span{display:block;font-size:13.5px;color:var(--muted);margin-bottom:6px;font-weight:500}
-.msgbox input[type=text],.msgbox textarea{
-  width:100%;padding:12px 14px;border-radius:12px;
-  background:var(--ink-2);border:1px solid var(--line);color:var(--white);
-  font-family:inherit;font-size:15.5px;
-}
-.msgbox input:focus,.msgbox textarea:focus{
-  outline:0;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.15)
-}
-.msgbox textarea{resize:vertical;line-height:1.55}
-.msg-row{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-.msg-foot{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:8px}
-.msg-status{font-size:14.5px;color:var(--muted)}
-.msg-status.ok{color:#7FE7F7}
-.msg-status.err{color:#FF9AA4}
-/* honeypot — hidden from people, visible to dumb bots */
-.hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important}
-.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
-
 /* ---------------- bundle ---------------- */
 .bundle{margin-top:28px;border-radius:var(--radius);padding:2px;background:var(--grad)}
 .bundle-in{
@@ -269,4 +242,3 @@ footer img{width:52px;height:52px;border-radius:50%;margin:0 auto 14px;opacity:.
   .reveal{opacity:1;transform:none}
 }
 
-.msgbox-cta{display:flex;justify-content:center;margin-top:22px}
