@@ -57,6 +57,10 @@ which lets you set a new one.
 ### Messages tab
 Real back-and-forth conversations with customers, like a chat app.
 
+> **The chat is currently switched off.** Nothing about it shows on your shop.
+> Turn it back on any time from **Contact → Customer chat**; saved
+> conversations are kept either way.
+
 There's a **chat bubble** in the corner of your shop. A customer taps it,
 leaves their name and contact, and writes. It lands here and **you reply
 straight back** — their window updates within seconds without them refreshing.
@@ -97,7 +101,11 @@ steps, and the footer.
 ### Contact tab
 Your TikTok and Instagram usernames, your WhatsApp number, and your country
 code (961 for Lebanon — it turns local numbers customers leave you into working
-WhatsApp links). You can also switch the message form on your shop on or off.
+WhatsApp links).
+
+**Customer chat** lives here too. Untick it and the chat bubble disappears from
+your shop completely — the code isn't even sent to the browser. Tick it again
+and it's back, with your old conversations intact.
 
 **Leave one empty and its buttons disappear from the whole site.** So when you
 open the Instagram account, just type the username here and it switches on
